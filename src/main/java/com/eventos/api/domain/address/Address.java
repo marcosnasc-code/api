@@ -27,6 +27,6 @@ public class Address {
     private String uf;
 
     @ManyToOne
-    @JoinColumn(name = "event_id")
+    @JoinColumn(name = "events_id")
     private Event event;
 }
