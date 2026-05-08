@@ -4,8 +4,13 @@ package com.eventos.api.service;
 import com.amazonaws.services.s3.AmazonS3;
 import com.eventos.api.domain.event.Event;
 import com.eventos.api.domain.event.EventRequestDTO;
+import com.eventos.api.domain.event.EventResponseDTO;
+import com.eventos.api.repositories.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +20,7 @@ import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 public class EventService {
@@ -22,8 +28,11 @@ public class EventService {
     @Autowired
     private AmazonS3 s3Client;
 
-    @Value("${aws.bucket.name")
+    @Value("${aws.bucket.name}")
     private String bucketName;
+
+    @Autowired
+    private EventRepository eventRepository;
 
 
     public Event createEvent(EventRequestDTO data){
@@ -39,6 +48,9 @@ public class EventService {
         newEvent.setEventUrl(data.eventUrl());
         newEvent.setDate(new Date(data.date()));
         newEvent.setImgUrl(imgUrl);
+        newEvent.setRemote(data.remote());
+
+        eventRepository.save(newEvent);
 
         return newEvent;
     }
@@ -63,6 +75,22 @@ public class EventService {
         fos.write(image.getBytes());
         fos.close();
         return convFile;
+    }
+
+    public List<EventResponseDTO> getEvents(int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Event> eventsPage = this.eventRepository.findAll(pageable);
+        return eventsPage.map(event -> new EventResponseDTO(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getDate(),
+                "event.getCity()",
+                "event.getUf()",
+                event.getRemote(),
+                event.getEventUrl(),
+                event.getImgUrl()
+        )).getContent();
     }
 
 }
