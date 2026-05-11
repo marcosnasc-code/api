@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -26,7 +27,6 @@ public class CouponService {
     public Coupon createCoupon(UUID eventId, CouponRequestDTO data){
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found"));
-
         Coupon newCoupon = new Coupon();
         newCoupon.setCode(data.code());
         newCoupon.setDiscount(data.discount());
@@ -36,4 +36,9 @@ public class CouponService {
         return couponRepository.save(newCoupon);
 
     }
+
+    public List<Coupon> consultCoupons(UUID id, Date currentDate){
+        return couponRepository.findByEventIdAndValidAfter(id, currentDate);
+    }
+
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface EventRepository extends JpaRepository<Event, UUID> {
@@ -21,10 +22,12 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
             "AND (:city = '' OR a.city LIKE %:city%)" +
             "AND (:uf = '' OR a.uf LIKE %:uf%)" +
             "AND (e.date >= :startDate AND e.date <= :endDate)")
-    Page<Event> findFilteredEvents(@Param("title") String title,
+    public Page<Event> findFilteredEvents(@Param("title") String title,
                                    @Param("city") String city,
                                    @Param("uf") String uf,
                                    @Param("startDate") Date startDate,
                                    @Param("endDate") Date endDate,
                                    Pageable pageable);
+
+    public Optional<Event> findById(@Param("id") UUID id);
 }
